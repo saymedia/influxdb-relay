@@ -47,6 +47,7 @@ Usage of influxdb-relay:
   -listen-addr="127.0.0.1:4444": Local address for the UDP listener
   -max-line-length=256: Maximum line length for line protocol, in bytes
   -target-url="http://127.0.0.1:8086/write?db=example": URL where recieved data should be written
+  -attempt-limit=10: Maximum number of times to retry failed influxdb requests (0=infinite)
 ```
 
 License
