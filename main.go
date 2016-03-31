@@ -19,6 +19,9 @@ var targetURL = flag.String(
 var listenAddrStr = flag.String(
 	"listen-addr", "127.0.0.1:4444", "Local address for the UDP listener",
 )
+var attemptLimit = flag.Int(
+	"attempt-limit", 10, "Maximum number of times to retry failed influxdb requests (0=infinite)",
+)
 
 func main() {
 	flag.Parse()
@@ -62,9 +65,9 @@ func main() {
 		SendBufferQueue: sendBufferQueue,
 	}
 	writer := &Writer{
-		SendBufferQueue:   sendBufferQueue,
-		TargetURL:         *targetURL,
-		RecvBufferQueue:   recvBufferQueue,
+		SendBufferQueue: sendBufferQueue,
+		TargetURL:       *targetURL,
+		RecvBufferQueue: recvBufferQueue,
 	}
 
 	go reader.Run()

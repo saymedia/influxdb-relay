@@ -29,7 +29,17 @@ func (w *Writer) Run() {
 		msg := <-w.SendBufferQueue
 
 		// We'll keep trying to send this message until we succeed
+		// or get tired of trying
+		tries := 0
 		for {
+			tries += 1
+
+			// we tried, really hard, but let's be serious...
+			if tries == *attemptLimit {
+				log.Println("gave up writing to backend after", tries, "attempts")
+				break
+			}
+
 			contentReader := bytes.NewReader(msg.Content)
 
 			resp, err := client.Post(
@@ -40,10 +50,17 @@ func (w *Writer) Run() {
 				time.Sleep(2 * time.Second)
 				continue
 			}
+
 			// InfluxDB docs say that only 204 exactly is truly successful,
 			// and in fact 200 OK is not successful. Strange, but okay...
 			if resp.StatusCode != 204 {
 				log.Println("backend write returned", resp.Status)
+				if resp.StatusCode == 400 {
+					// invalid request; no amount of retries will
+					// reform malformed data
+					break
+				}
+
 				time.Sleep(2 * time.Second)
 				continue
 			}
